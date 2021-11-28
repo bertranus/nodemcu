@@ -1,0 +1,56 @@
+on Rules#Timer=1 do
+    GPIO,14,0
+Endon
+
+//вниз
+on Clock#Time=All,22:25 do
+    GPIO,12,1 // направление вниз
+    Publish d1-pro-b/blind,1
+    timerset,1,75
+    GPIO,14,1 // питание моторов
+Endon
+
+//вверх в обычные дни
+on Clock#Time=All,07:00 do
+    if %sysweekday%!=1 and %sysweekday%!=7
+        GPIO,12,0 // направление вверх
+        Publish d1-pro-b/blind, 0
+        timerset,1,75
+        GPIO,14,1
+    endif
+Endon
+
+//вверх в выходные дни
+on Clock#Time=All,09:30 do
+    if %sysweekday%=1 or %sysweekday%=7
+        GPIO,12,0 // направление вверх
+        Publish d1-pro-b/blind, 0
+        timerset,1,75
+        GPIO,14,1
+    endif
+Endon
+
+
+on blind#blind do
+    if [blind#blind] = 101 //вниз
+        GPIO,12,1
+        Publish d1-pro-b/upDownRelay/State,down
+        timerset,1,75
+        GPIO,14,1
+    endif
+endon 
+
+on blind#blind do
+    if [blind#blind] = 100//вверх
+        GPIO,12,0
+        Publish d1-pro-b/upDownRelay/State,up
+        timerset,1,75
+        GPIO,14,1
+    endif
+endon 
+
+on blind#blind do
+    if [blind#blind] = 102//стоп
+        GPIO,14,0
+    endif
+endon 

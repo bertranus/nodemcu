@@ -1,0 +1,57 @@
+// timer1 - время после отключения света
+// timer2 - время для управления по интернету
+// 5,1 arg#status включено реле (свет) 1 или нет 0
+// 5,2 arg#time 180, 720 - время работы после отключения света
+// 5,3 arg#lux - светимость 10
+// mqtt 100 - выключен, 101 включен
+// реле GPIO,14 - 1 выкл, 0 вкл
+
+On System#Boot do
+  TaskValueSet 5,2,120 //arg#time
+  TaskValueSet 5,3,1 //arg#lux
+Endon
+
+on Lux#Value>[arg#lux] do
+    if [arg#status]=0
+        GPIO,14,0 // включить реле
+        TaskValueSet 5,1,1 // arg#status
+        timerSet,1,0
+        timerSet,2,0
+        Publish d1-mini-v/command/light,on
+    endif
+Endon
+
+on Lux#Value<[arg#lux] do
+    if [arg#status]=1
+
+        if [SI7021#Humidity]>60
+            timerSet,1,[arg#time]*4 
+        else
+            timerSet,1,[arg#time]
+        endif
+
+        TaskValueSet 5,1,0 // arg#status
+        Publish d1-mini-v/command/light,off
+    endif
+Endon
+
+on Rules#Timer=1 do
+    if [relay#vent]<>101 //выключить
+        GPIO,14,1
+    endif
+Endon
+
+on relay#vent do
+    if [relay#vent]=101 //включить
+        GPIO,14,0
+        timerSet,2,[arg#time]*4
+    else 
+        GPIO,14,1 //выключить
+        timerSet,2,0
+    endif
+endon 
+
+on Rules#Timer=2 do
+    GPIO,14,1
+    timerSet,2,0
+endon

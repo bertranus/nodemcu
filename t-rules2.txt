@@ -1,0 +1,29 @@
+// выключение по таймеру1
+on Rules#Timer=1 do
+    if [relay#vent]=100 // выключено по mqtt
+        GPIO,14,1
+    endif
+    TaskValueSet 3,1,0
+Endon
+
+// включение по mqtt
+on relay#vent do
+    if [relay#vent]=101 //включить
+        GPIO,14,0
+        timerSet,2,[arg#time]*6 // включение таймера максимального времени работы реле
+    endif
+endon 
+
+// выключение по mqtt
+on relay#vent do
+    if [relay#vent]=100 //выключить
+        GPIO,14,1
+        timerSet,2,0
+    endif
+endon 
+
+// выключение по максимальному таймеру
+on Rules#Timer=2 do
+    GPIO,14,1
+    timerSet,2,0
+endon
