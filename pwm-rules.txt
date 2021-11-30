@@ -1,0 +1,12 @@
+ On System#Boot do    //When the ESP boots, do
+   GPIO,12,0
+   timerSet,1,5     //Set Timer 1 for the next event in 10 seconds
+ endon
+ On Rules#Timer=1 do  //When Timer1 expires, do
+PWM,12,1023,2000
+   timerSet,2,5      //Set Timer 2 for the next event in 1 second
+ endon
+ On Rules#Timer=2 do  //When Timer2 expires, do
+   pwm,12,0,2000
+   timerSet,1,5      //Set Timer1 for the next event in 30 seconds
+ endon
