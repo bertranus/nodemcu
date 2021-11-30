@@ -1,0 +1,22 @@
+//1-switch-hall-gpio13-state
+//2-switch-led-gpio15-state
+//3-pulse counter-counter-gpio13-count/total/time
+//4-dummy-arg---maxCount/maxTime
+
+on hall#State do
+  gpio,15,[hall#State]
+endon
+
+//сброс счетчика по достижении лимита
+on counter#Total do
+  if [counter#Total]>=[arg#maxCount]
+    ResetPulseCounter
+  endif
+endon
+
+// установка максимума оборотов
+on System#Boot do
+  ResetPulseCounter
+  TaskValueSet arg,1,5
+  TaskValueSet arg,2,15
+endon
