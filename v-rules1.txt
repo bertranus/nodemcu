@@ -11,7 +11,7 @@ On System#Boot do
   TaskValueSet 5,3,1 //arg#lux
 Endon
 
-on Lux#Value>[arg#lux] do
+on Lux#Value>=[arg#lux] do
     if [arg#status]=0
         GPIO,14,0 // включить реле
         TaskValueSet 5,1,1 // arg#status
@@ -25,7 +25,8 @@ on Lux#Value<[arg#lux] do
     if [arg#status]=1
 
         if [SI7021#Humidity]>60
-            timerSet,1,[arg#time]*4 
+            Let,1,[arg#time]*4 
+            timerSet,1,[VAR#1] 
         else
             timerSet,1,[arg#time]
         endif
@@ -44,7 +45,8 @@ Endon
 on relay#vent do
     if [relay#vent]=101 //включить
         GPIO,14,0
-        timerSet,2,[arg#time]*4
+        Let,2,[arg#time]*4 
+        timerSet,2,[VAR#2] 
     else 
         GPIO,14,1 //выключить
         timerSet,2,0
