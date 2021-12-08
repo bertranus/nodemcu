@@ -39,7 +39,8 @@ Endon
 on Lux#Value<[arg#lux] do
     if [arg#status]=1
         if [arg#isLong]=2
-            timerSet,1,[arg#time]*4
+            Let,1,[arg#time]*4
+            timerSet,1,[VAR#1]
         else
             timerSet,1,[arg#time]
         endif
