@@ -10,7 +10,8 @@ Endon
 on relay#vent do
     if [relay#vent]=101 //включить
         GPIO,14,0
-        timerSet,2,[arg#time]*6 // включение таймера максимального времени работы реле
+        Let,2,[arg#time]*6
+        timerSet,2,[VAR#2] // включение таймера максимального времени работы реле
     endif
 endon 
 
