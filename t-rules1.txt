@@ -20,7 +20,7 @@ on Lux#Value>[arg#lux] do
         GPIO,14,0 // включить реле
         timerSet,1,0 // отключить таймер1
         TaskValueSet 3,1,1 // выставить флаг включения реле
-        Publish nodemcu-t/light, on
+        Publish nodemcu-t/status/light, on
     endif
 
     if [arg#isLong]=0
@@ -46,7 +46,7 @@ on Lux#Value<[arg#lux] do
         endif
         TaskValueSet 3,3,0 // сброс arg#isLong
         TaskValueSet 3,1,0 // сброс arg#status
-        Publish nodemcu-t/light, off
+        Publish nodemcu-t/status/light, off
     endif
 Endon
 
