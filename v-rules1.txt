@@ -1,27 +1,28 @@
 // timer1 - время после отключения света
-// timer2 - время для управления по интернету
+// timer2 - максимальное время для управления по интернету
 // 5,1 arg#status включено реле (свет) 1 или нет 0
 // 5,2 arg#time 180, 720 - время работы после отключения света
-// 5,3 arg#lux - светимость 10
+// 5,3 arg#lux - светимость >800 выкл, 559 вкл свет (500-800)
 // mqtt 100 - выключен, 101 включен
 // реле GPIO,14 - 1 выкл, 0 вкл
 
 On System#Boot do
   TaskValueSet 5,2,120 //arg#time
-  TaskValueSet 5,3,1 //arg#lux
-Endon
-
-on Lux#Value>=[arg#lux] do
-    if [arg#status]=0
-        GPIO,14,0 // включить реле
-        TaskValueSet 5,1,1 // arg#status
-        timerSet,1,0
-        timerSet,2,0
-        Publish d1-mini-v/command/light,on
-    endif
+  TaskValueSet 5,3,800 //arg#lux
 Endon
 
 on Lux#Value<[arg#lux] do
+    if [arg#status]=0
+        TaskValueSet 5,1,1 // arg#status
+        timerSet,1,0
+        timerSet,2,0
+        Publish d1-mini-v/status/light,on
+        Publish d1-mini-v/status/vent,on
+    endif
+    GPIO,14,0 // включить реле
+Endon
+
+on Lux#Value>[arg#lux] do
     if [arg#status]=1
 
         if [SI7021#Humidity]>60
@@ -32,23 +33,26 @@ on Lux#Value<[arg#lux] do
         endif
 
         TaskValueSet 5,1,0 // arg#status
-        Publish d1-mini-v/command/light,off
+        Publish d1-mini-v/status/light,off
     endif
 Endon
 
 on Rules#Timer=1 do
     if [relay#vent]<>101 //выключить
         GPIO,14,1
+        Publish d1-mini-v/status/vent,off
     endif
 Endon
 
 on relay#vent do
     if [relay#vent]=101 //включить
         GPIO,14,0
-        Let,2,[arg#time]*4 
+        Publish d1-mini-v/status/vent,on
+        Let,2,[arg#time]*10
         timerSet,2,[VAR#2] 
     else 
         GPIO,14,1 //выключить
+        Publish d1-mini-v/status/vent,off
         timerSet,2,0
     endif
 endon 
@@ -56,4 +60,5 @@ endon
 on Rules#Timer=2 do
     GPIO,14,1
     timerSet,2,0
+    Publish d1-mini-v/command/relay/vent,100
 endon
